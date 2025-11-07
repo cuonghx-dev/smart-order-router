@@ -1,5 +1,6 @@
 import { Token } from '@uniswap/sdk-core';
 import { FACTORY_ADDRESS } from '@uniswap/v3-sdk';
+
 import { ChainId, NETWORKS_WITH_SAME_UNISWAP_ADDRESSES } from './chains';
 
 const CELO_V3_CORE_FACTORY_ADDRESSES =
@@ -7,12 +8,20 @@ const CELO_V3_CORE_FACTORY_ADDRESSES =
 const CELO_QUOTER_ADDRESSES = '0x82825d0554fA07f7FC52Ab63c961F330fdEFa8E8';
 const CELO_MULTICALL_ADDRESS = '0x633987602DE5C4F337e3DbF265303A1080324204';
 
+export const JOC_TESTNET_CORE_FACTORY_ADDRESSES =
+  '0x209A90fb11804326be06FdD9ffDA8992DB6d99cB';
+export const JOC_TESTNET_QUOTER_ADDRESSES =
+  '0xE662AD9B761174Bd929f192d3DD204D4c53C9AD5';
+export const JOC_TESTNET_MULTICALL_ADDRESS =
+  '0x3A96f3294e60Ef0241BA1d1CD8813dc5B02492eE';
+
 export const V3_CORE_FACTORY_ADDRESSES: AddressMap = {
   ...constructSameAddressMap(FACTORY_ADDRESS),
   [ChainId.CELO]: CELO_V3_CORE_FACTORY_ADDRESSES,
   [ChainId.CELO_ALFAJORES]: CELO_V3_CORE_FACTORY_ADDRESSES,
 
   // TODO: Gnosis + Moonbeam contracts to be deployed
+  [ChainId.JOC_TESTNET]: JOC_TESTNET_CORE_FACTORY_ADDRESSES,
 };
 
 export const QUOTER_V2_ADDRESSES: AddressMap = {
@@ -21,6 +30,7 @@ export const QUOTER_V2_ADDRESSES: AddressMap = {
   [ChainId.CELO_ALFAJORES]: CELO_QUOTER_ADDRESSES,
 
   // TODO: Gnosis + Moonbeam contracts to be deployed
+  [ChainId.JOC_TESTNET]: JOC_TESTNET_QUOTER_ADDRESSES,
 };
 
 export const MIXED_ROUTE_QUOTER_V1_ADDRESSES: AddressMap = {
@@ -36,6 +46,7 @@ export const UNISWAP_MULTICALL_ADDRESSES: AddressMap = {
   [ChainId.CELO_ALFAJORES]: CELO_MULTICALL_ADDRESS,
 
   // TODO: Gnosis + Moonbeam contracts to be deployed
+  [ChainId.JOC_TESTNET]: JOC_TESTNET_MULTICALL_ADDRESS,
 };
 
 export const OVM_GASPRICE_ADDRESS =
@@ -138,5 +149,12 @@ export const WETH9: {
     18,
     'WETH',
     'Wrapped Ether'
+  ),
+  [ChainId.JOC_TESTNET]: new Token(
+    ChainId.JOC_TESTNET,
+    '0x8B85219c0767Ce4FA5ae5944d71aB4a3De27090d',
+    18,
+    'WJOCT',
+    'Wrapped JOCT'
   ),
 };

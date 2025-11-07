@@ -510,6 +510,14 @@ export const WBTC_MOONBEAM = new Token(
   'Wrapped BTC bridged using Multichain'
 );
 
+export const USDTX_JOC_TESTNET = new Token(
+  ChainId.JOC_TESTNET,
+  '0x382eb09D8cE59968683001947EF04cB34f7A180E',
+  6,
+  'UDSTX',
+  'USDTX'
+);
+
 export class TokenProvider implements ITokenProvider {
   constructor(
     private chainId: ChainId,

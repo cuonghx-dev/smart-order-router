@@ -16,6 +16,7 @@ export enum ChainId {
   CELO_ALFAJORES = 44787,
   GNOSIS = 100,
   MOONBEAM = 1284,
+  JOC_TESTNET = 10081,
 }
 
 // WIP: Gnosis, Moonbeam
@@ -34,6 +35,7 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.CELO_ALFAJORES,
   ChainId.CELO,
   // Gnosis and Moonbeam don't yet have contracts deployed yet
+  ChainId.JOC_TESTNET,
 ];
 
 export const V2_SUPPORTED = [
@@ -97,6 +99,8 @@ export const ID_TO_CHAIN_ID = (id: number): ChainId => {
       return ChainId.GNOSIS;
     case 1284:
       return ChainId.MOONBEAM;
+    case 10081:
+      return ChainId.JOC_TESTNET;
     default:
       throw new Error(`Unknown chain id: ${id}`);
   }
@@ -118,6 +122,7 @@ export enum ChainName {
   CELO_ALFAJORES = 'celo-alfajores',
   GNOSIS = 'gnosis-mainnet',
   MOONBEAM = 'moonbeam-mainnet',
+  JOC_TESTNET = 'joc-testnet',
 }
 
 export enum NativeCurrencyName {
@@ -127,6 +132,7 @@ export enum NativeCurrencyName {
   CELO = 'CELO',
   GNOSIS = 'XDAI',
   MOONBEAM = 'GLMR',
+  JOCT = 'JOCT',
 }
 export const NATIVE_NAMES_BY_ID: { [chainId: number]: string[] } = {
   [ChainId.MAINNET]: [
@@ -183,6 +189,7 @@ export const NATIVE_NAMES_BY_ID: { [chainId: number]: string[] } = {
   [ChainId.CELO_ALFAJORES]: ['CELO'],
   [ChainId.GNOSIS]: ['XDAI'],
   [ChainId.MOONBEAM]: ['GLMR'],
+  [ChainId.JOC_TESTNET]: ['JOCT'],
 };
 
 export const NATIVE_CURRENCY: { [chainId: number]: NativeCurrencyName } = {
@@ -201,6 +208,7 @@ export const NATIVE_CURRENCY: { [chainId: number]: NativeCurrencyName } = {
   [ChainId.CELO_ALFAJORES]: NativeCurrencyName.CELO,
   [ChainId.GNOSIS]: NativeCurrencyName.GNOSIS,
   [ChainId.MOONBEAM]: NativeCurrencyName.MOONBEAM,
+  [ChainId.JOC_TESTNET]: NativeCurrencyName.JOCT,
 };
 
 export const ID_TO_NETWORK_NAME = (id: number): ChainName => {
@@ -235,6 +243,8 @@ export const ID_TO_NETWORK_NAME = (id: number): ChainName => {
       return ChainName.GNOSIS;
     case 1284:
       return ChainName.MOONBEAM;
+    case 10081:
+      return ChainName.JOC_TESTNET;
     default:
       throw new Error(`Unknown chain id: ${id}`);
   }
@@ -272,6 +282,8 @@ export const ID_TO_PROVIDER = (id: ChainId): string => {
       return process.env.JSON_RPC_PROVIDER_CELO!;
     case ChainId.CELO_ALFAJORES:
       return process.env.JSON_RPC_PROVIDER_CELO_ALFAJORES!;
+    case ChainId.JOC_TESTNET:
+      return process.env.JSON_RPC_PROVIDER_JOC_TESTNET!;
     default:
       throw new Error(`Chain id: ${id} not supported`);
   }
@@ -385,6 +397,13 @@ export const WRAPPED_NATIVE_CURRENCY: { [chainId in ChainId]: Token } = {
     'WGLMR',
     'Wrapped GLMR'
   ),
+  [ChainId.JOC_TESTNET]: new Token(
+    ChainId.JOC_TESTNET,
+    '0x8B85219c0767Ce4FA5ae5944d71aB4a3De27090d',
+    18,
+    'WJOCT',
+    'Wrapped JOCT'
+  ),
 };
 
 function isMatic(
@@ -487,6 +506,27 @@ class MoonbeamNativeCurrency extends NativeCurrency {
   }
 }
 
+function isJoc(chainId: number): chainId is ChainId.JOC_TESTNET {
+  return chainId === ChainId.JOC_TESTNET;
+}
+
+class JocNativeCurrency extends NativeCurrency {
+  equals(other: Currency): boolean {
+    return other.isNative && other.chainId === this.chainId;
+  }
+
+  get wrapped(): Token {
+    if (!isJoc(this.chainId)) throw new Error('Not joc');
+    const wrapped = WRAPPED_NATIVE_CURRENCY[this.chainId];
+    return wrapped;
+  }
+
+  public constructor(chainId: number) {
+    if (!isJoc(chainId)) throw new Error('Not joc');
+    super(chainId, 18, 'JOCT', 'JOC Testnet');
+  }
+}
+
 export class ExtendedEther extends Ether {
   public get wrapped(): Token {
     if (this.chainId in WRAPPED_NATIVE_CURRENCY)
@@ -517,6 +557,8 @@ export function nativeOnChain(chainId: number): NativeCurrency {
     cachedNativeCurrency[chainId] = new GnosisNativeCurrency(chainId);
   else if (isMoonbeam(chainId))
     cachedNativeCurrency[chainId] = new MoonbeamNativeCurrency(chainId);
+  else if (isJoc(chainId))
+    cachedNativeCurrency[chainId] = new JocNativeCurrency(chainId);
   else cachedNativeCurrency[chainId] = ExtendedEther.onChain(chainId);
 
   return cachedNativeCurrency[chainId]!;
